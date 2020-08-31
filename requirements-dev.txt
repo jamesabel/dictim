@@ -1,0 +1,8 @@
+ismain
+balsa
+twine
+pytest
+wheel
+coverage
+pytest-cov
+black
