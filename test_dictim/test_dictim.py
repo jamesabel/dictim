@@ -14,7 +14,7 @@ def test_dictim():
     assert d.get("b") == 3
 
 
-class Test_dicti:
+class Test_dictim:
     @pytest.fixture(autouse=True)
     def setup(self):
         """CaseInsensitiveDict instance with "Accept" header."""
