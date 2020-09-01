@@ -2,6 +2,10 @@
 
 case insensitive dict for modern Python (Python 3)
 
+## Usage
+
+    pip install dictim
+
 # Example
 
     from dictim import dictim
