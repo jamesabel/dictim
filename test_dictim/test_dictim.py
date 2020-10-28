@@ -1,9 +1,13 @@
 import pytest
+import json
 
 from dictim import dictim
 
 
 def test_dictim():
+
+    # test the case insensitivity
+
     d = dictim()
     d["A"] = 1
     d["a"] = 2
@@ -14,7 +18,19 @@ def test_dictim():
     assert d.get("b") == 3
 
 
-class Test_dictim:
+def test_dictim_jsonable():
+
+    # test that we can cast a dictim to a dict and then jsonify that dict properly
+
+    d = dictim()
+    d["A"] = 1
+    d["b"] = 2
+
+    # original case is preserved
+    assert json.dumps(dict(d)) == '{"A": 1, "b": 2}'
+
+
+class TestDictim:
     @pytest.fixture(autouse=True)
     def setup(self):
         """CaseInsensitiveDict instance with "Accept" header."""
