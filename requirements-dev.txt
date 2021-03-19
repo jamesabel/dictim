@@ -6,3 +6,4 @@ wheel
 coverage
 pytest-cov
 black
+mypy
