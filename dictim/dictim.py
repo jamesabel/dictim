@@ -1,4 +1,5 @@
 import collections.abc
+from typing import Iterable, Any
 
 
 class dictim(collections.abc.MutableMapping):
@@ -71,3 +72,26 @@ class dictim(collections.abc.MutableMapping):
 
     def __repr__(self):
         return f"{dict(self.items())}"
+
+    def deep_get(self, keys: Iterable, default_value: Any = None) -> Any:
+        """
+        liberal deep get - gets a value from a nested dict or dictim, with a default value. Default value is returned whenever a key is not found.
+        Nested dicts are treated as dictims. No error checking is done - if key(s) aren't found, the default value is returned.
+        e.g.
+        a = dictim({"a": {"b": 1}})
+        a.deep_get(["a", "b"])  # returns 1
+
+        :param keys: keys to iterate over, used to descend into a dictim
+        :param default_value: default value in case keys don't find a corresponding value
+        :return: leaf value or None if not found
+        """
+        value = self  # type: Any
+        for key in keys:
+            try:
+                value = value.get(key, default_value)
+                if isinstance(value, dict):
+                    value = dictim(value)  # convert all dicts to dictims
+            except AttributeError:
+                value = default_value  # .get() raised AttributeError
+                break
+        return value
