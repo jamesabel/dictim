@@ -8,7 +8,7 @@ def test_deep_get_simple():
 
 
 def test_deep_get():
-    test_dict = dictim({"a": {"B": {"C": 1 + 2j}}})  # B and C are upper case, but it'll work since .deep_get converts all regular dict's to dictim
+    test_dict = dictim({"a": {"B": {"C": 1 + 2j}, "D": 99}})  # B and C are upper case, but it'll work since .deep_get converts all regular dict's to dictim
     value = test_dict.deep_get(("a", "b", "c"))  # tuple
     assert value == 1 + 2j
 
