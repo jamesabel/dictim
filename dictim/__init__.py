@@ -1,1 +1,1 @@
-from .dictim import dictim
+from .dictim import dictim, as_dict

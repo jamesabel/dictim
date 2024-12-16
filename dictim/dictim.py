@@ -1,6 +1,18 @@
 import collections.abc
 from typing import Iterable, Any
+from copy import deepcopy
 
+def as_dict(d):
+    """
+    Recursively converts a dictim to a regular dict
+    """
+    if isinstance(d, dictim):
+        ret_d = as_dict(dict(d))
+    elif isinstance(d, list):
+        ret_d = [as_dict(x) for x in d]
+    else:
+        ret_d = deepcopy(d)
+    return ret_d
 
 class dictim(collections.abc.MutableMapping):
     """
@@ -95,3 +107,10 @@ class dictim(collections.abc.MutableMapping):
                 value = default_value  # .get() raised AttributeError
                 break
         return value
+
+    def as_dict(self) -> dict:
+        """
+        Recursively converts this dictim to a regular dict
+        :return: a regular dict
+        """
+        return as_dict(self)
