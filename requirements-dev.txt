@@ -1,10 +1,20 @@
+# example
 ismain
-balsa
-twine
+#
+# pydantic compatibility
+pydantic
+#
+# testing
 pytest
-wheel
 coverage
 pytest-cov
 pytest-pycharm
+#
+# linting
 black
+flake8
 mypy
+#
+# packaging
+twine
+wheel
