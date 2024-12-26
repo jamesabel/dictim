@@ -2,6 +2,24 @@ import collections.abc
 from typing import Iterable, Any
 from copy import deepcopy
 
+try:
+    from pydantic_core import CoreSchema, core_schema
+    from pydantic import GetCoreSchemaHandler
+
+    using_pydantic = True
+except ImportError:
+    CoreSchema = Any
+    core_schema = Any
+    GetCoreSchemaHandler = Any
+    using_pydantic = False
+
+
+class DictimValidationError(Exception):
+    """Custom exception for dictim validation errors."""
+
+    pass
+
+
 def as_dict(d):
     """
     Recursively converts a dictim to a regular dict
@@ -13,6 +31,7 @@ def as_dict(d):
     else:
         ret_d = deepcopy(d)
     return ret_d
+
 
 class dictim(collections.abc.MutableMapping):
     """
@@ -114,3 +133,19 @@ class dictim(collections.abc.MutableMapping):
         :return: a regular dict
         """
         return as_dict(self)
+
+    # pydantic field compatibility
+
+    if using_pydantic:
+
+        @classmethod
+        def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> CoreSchema:
+            return core_schema.no_info_after_validator_function(cls, handler.generate_schema(dict))
+
+        @classmethod
+        def validate(cls, value: Any, field: str):
+            if isinstance(value, dictim):
+                return value
+            if isinstance(value, dict):
+                return dictim(value)
+            raise DictimValidationError(f"Invalid type for dictim: {type(value)}")
