@@ -1,5 +1,5 @@
 import collections.abc
-from typing import Iterable, Any
+from typing import Iterable, Any, get_args
 from copy import deepcopy
 
 try:
@@ -22,15 +22,9 @@ class DictimValidationError(Exception):
 
 def as_dict(d):
     """
-    Recursively converts a dictim to a regular dict
+    Converts a dictim to a regular dict
     """
-    if isinstance(d, dictim):
-        ret_d = as_dict(dict(d))
-    elif isinstance(d, list):
-        ret_d = [as_dict(x) for x in d]
-    else:
-        ret_d = deepcopy(d)
-    return ret_d
+    return dict(deepcopy(d))
 
 
 class dictim(collections.abc.MutableMapping):
@@ -71,13 +65,22 @@ class dictim(collections.abc.MutableMapping):
     def __setitem__(self, key, value):
         # Use the lowercased key for lookups, but store the actual
         # key alongside the value.
-        self._store[key.casefold()] = (key, value)
+        if isinstance(key, str):
+            self._store[key.casefold()] = (key, value)
+        else:
+            self._store[key] = (key, value)
 
     def __getitem__(self, key):
-        return self._store[key.casefold()][1]
+        if isinstance(key, str):
+            return self._store[key.casefold()][1]
+        else:
+            return self._store[key][1]
 
     def __delitem__(self, key):
-        del self._store[key.casefold()]
+        if isinstance(key, str):
+            del self._store[key.casefold()]
+        else:
+            del self._store[key]
 
     def __iter__(self):
         return (casedkey for casedkey, mappedvalue in self._store.values())
@@ -139,13 +142,21 @@ class dictim(collections.abc.MutableMapping):
     if using_pydantic:
 
         @classmethod
-        def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> CoreSchema:
-            return core_schema.no_info_after_validator_function(cls, handler.generate_schema(dict))
+        def __get_pydantic_core_schema__(cls, source_type: type[object], handler: callable) -> core_schema.CoreSchema:
+            def with_info_validate(value: object, info: core_schema.ValidationInfo) -> dictim:
+                if len(key_type_args := get_args(source_type)) > 0:
+                    # restore int keys from JSON
+                    key_type = key_type_args[0]
+                    if key_type is int and isinstance(value, dict):
+                        return dictim({int(k): v for k, v in value.items()})
+                if isinstance(value, cls):
+                    return value
+                raise TypeError(f"Cannot create {cls.__name__} from {type(value)}")
 
-        @classmethod
-        def validate(cls, value: Any, field: str):
-            if isinstance(value, dictim):
-                return value
-            if isinstance(value, dict):
-                return dictim(value)
-            raise DictimValidationError(f"Invalid type for dictim: {type(value)}")
+            def serialize(value: dictim) -> dict:
+                return value.as_dict()
+
+            return core_schema.with_info_plain_validator_function(
+                function=with_info_validate,
+                serialization=core_schema.plain_serializer_function_ser_schema(function=serialize),
+            )
