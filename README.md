@@ -1,6 +1,11 @@
 # dictim
 
-case insensitive dict for modern Python (Python 3)
+Case-insensitive `dict` keys. Like a `dict`, but keys are case-insensitive.
+
+- Supports unicode
+- Supports pydantic (handy for JSON serialization)
+
+Name comes from `dict`, case-`i`nsensitive, `m`apping.
 
 ## Usage
 
