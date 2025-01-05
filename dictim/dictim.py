@@ -151,7 +151,7 @@ class dictim(collections.abc.MutableMapping):
                         return dictim({int(k): v for k, v in value.items()})
                 if isinstance(value, cls):
                     return value
-                raise TypeError(f"Cannot create {cls.__name__} from {type(value)}")
+                return dictim(value)
 
             def serialize(value: dictim) -> dict:
                 return value.as_dict()
