@@ -1,16 +1,14 @@
 import collections.abc
-from typing import Iterable, Any, get_args
+from typing import Iterable, Any, get_args, Callable
 from copy import deepcopy
 
 try:
-    from pydantic_core import CoreSchema, core_schema
-    from pydantic import GetCoreSchemaHandler
+    from pydantic_core import core_schema
 
     using_pydantic = True
 except ImportError:
-    CoreSchema = Any
-    core_schema = Any
-    GetCoreSchemaHandler = Any
+    core_schema = None  # type: ignore
+
     using_pydantic = False
 
 
@@ -142,7 +140,7 @@ class dictim(collections.abc.MutableMapping):
     if using_pydantic:
 
         @classmethod
-        def __get_pydantic_core_schema__(cls, source_type: type[object], handler: callable) -> core_schema.CoreSchema:
+        def __get_pydantic_core_schema__(cls, source_type: type[object], handler: Callable) -> core_schema.CoreSchema:
             def with_info_validate(value: object, info: core_schema.ValidationInfo) -> dictim:
                 if len(key_type_args := get_args(source_type)) > 0:
                     # restore int keys from JSON
